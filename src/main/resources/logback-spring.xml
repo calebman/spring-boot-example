@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!--
+        简要描述
+        日志格式 => %d{HH:mm:ss.SSS}(时间) [%-5level](日志级别) %logger{36}(logger名字最长36个字符，否则按照句点分割) - %msg%n(具体日志信息并且换行)
+
+        开发环境 => ${basepackage}包下控制台打印DEBUG级别及以上、其他包控制台打印INFO级别及以上
+        演示（测试）环境 => ${basepackage}包下控制台打印INFO级别及以上、其他包控制台以及文件打印WARN级别及以上
+        生产环境 => 控制台以及文件打印ERROR级别及以上
+
+        日志文件生成规则如下：
+        文件生成目录 => ${logdir}
+        当日的log文件名称 => ${appname}.log
+        其他时候的log文件名称 => ${appname}.%d{yyyy-MM-dd}.log
+        日志文件最大 => ${maxsize}
+        最多保留 => ${maxdays}天
+    -->
+    <!--自定义参数 -->
+    <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
+    <property name="maxsize" value="30MB" />
+    <!--只保留最近90天的日志-->
+    <property name="maxdays" value="90" />
+    <!--application.yml 传递参数 -->
+    <!--log文件生成目录-->
+    <springProperty scope="context" name="logdir" source="resources.logdir"/>
+    <!--应用名称-->
+    <springProperty scope="context" name="appname" source="resources.appname"/>
+    <!--项目基础包-->
+    <springProperty scope="context" name="basepackage" source="resources.basepackage"/>
+
+    <!--输出到控制台 ConsoleAppender-->
+    <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
+        <!--展示格式 layout-->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>
+                <pattern>%d{HH:mm:ss.SSS} [%-5level] %logger{36} - %msg%n</pattern>
+            </pattern>
+        </layout>
+    </appender>
+    <!--输出到文件 FileAppender-->
+    <appender name="fileLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--
+            日志名称，如果没有File 属性，那么只会使用FileNamePattern的文件路径规则
+            如果同时有<File>和<FileNamePattern>，那么当天日志是<File>，明天会自动把今天
+            的日志改名为今天的日期。即，<File> 的日志都是当天的。
+        -->
+        <File>${logdir}/${appname}.log</File>
+        <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
+            <FileNamePattern>${logdir}/${appname}.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <maxHistory>${maxdays}</maxHistory>
+            <totalSizeCap>${maxsize}</totalSizeCap>
+        </rollingPolicy>
+        <!--日志输出编码格式化-->
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{HH:mm:ss.SSS} [%-5level] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 开发环境-->
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="consoleLog"/>
+        </root>
+        <!--
+            additivity是子Logger 是否继承 父Logger 的 输出源（appender） 的标志位
+            在这里additivity配置为false代表如果${basepackage}中有INFO级别日志则子looger打印 root不打印
+        -->
+        <logger name="${basepackage}" level="DEBUG" additivity="false">
+            <appender-ref ref="consoleLog"/>
+        </logger>
+    </springProfile>
+
+    <!-- 演示（测试）环境-->
+    <springProfile name="test">
+        <root level="WARN">
+            <appender-ref ref="consoleLog"/>
+            <appender-ref ref="fileLog"/>
+        </root>
+        <logger name="${basepackage}" level="INFO" additivity="false">
+            <appender-ref ref="consoleLog"/>
+            <appender-ref ref="fileLog"/>
+        </logger>
+    </springProfile>
+
+    <!-- 生产环境 -->
+    <springProfile name="prod">
+        <root level="ERROR">
+            <appender-ref ref="consoleLog"/>
+            <appender-ref ref="fileLog"/>
+        </root>
+    </springProfile>
+</configuration>

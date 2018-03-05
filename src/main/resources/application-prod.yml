@@ -1,0 +1,13 @@
+server:
+  port: 18080
+
+spring:
+    datasource:
+        url: jdbc:mysql://localhost:3306/test?characterEncoding=utf-8
+        username: kingeid
+        password: kingeid
+        
+#自定义配置
+resources:
+    logdir: logs/
+    midpHost: 1.1.1.1
