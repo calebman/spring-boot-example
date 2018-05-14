@@ -2,7 +2,7 @@ package com.spring.demo.springbootexample.beans;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
+//
 @ApiModel(value = "产品信息")
 public class Product {
 
