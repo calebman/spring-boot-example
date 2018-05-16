@@ -8,6 +8,7 @@
 - 集成Swagger2
 - 多环境配置
 - 多环境下的日志配置
+- jwt配置
 - 常用配置
 ### 为什么使用SpringBoot
 SpringBoot相对于传统的SSM框架的优点是提供了默认的样板化配置，简化了Spring应用的初始搭建过程，如果你不想被众多的xml配置文件困扰，可以考虑使用SpringBoot替代
@@ -511,7 +512,62 @@ resources:
         logger.error("日志输出 {}", "error");
         return "00";
     }
+```  
+### jwt配置  
+
+pom文件添加jwt与spring security依赖
+
 ```
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.7.0</version>
+		</dependency>		 
+```  
+
+自定义配置文件中添加jwt超时时间，token生成私钥
+
+在/jwt/JsonWebTokenUtility中定义生成token置于response头的方法以及解析token校验的方法  
+```  
+
+
+#jwt配置
+jwt:
+    EXPIRATIONTIME: 1000
+    SECRET: OHAHAHAHA
+
+```  
+自定义配置统一在config/Config中配置get方法  
+  
+  spring security配置某些url不被控制，例如 /testJwt  /testJwtdecrypt
+  ```
+      @Override
+      protected void configure(HttpSecurity http) throws Exception {
+          http
+                  .authorizeRequests()
+                  .antMatchers("/testJwt","/testJwtdecrypt").permitAll()
+                  .anyRequest().authenticated()
+                  .and()
+                  .formLogin()
+                  .loginPage("/login")
+                  .permitAll()
+                  .and()
+                  .logout()
+                  .permitAll();
+      }
+  
+      @Autowired
+      public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+          auth
+                  .inMemoryAuthentication()
+                  .withUser("user").password("password").roles("USER");
+      }
+  ```
+
 ### 常用配置
 ##### 加载自定义配置
 ```

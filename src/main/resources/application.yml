@@ -52,3 +52,10 @@ resources:
     appname: spring-boot-example
     #日志打印的基础扫描包
     basepackage: com.spring.demo.springbootexample
+
+
+#jwt配置
+jwt:
+    EXPIRATIONTIME: 1000*60*60*24*1
+    SECRET: OHAHAHAHA
+    HEADER_NAME: Authorization

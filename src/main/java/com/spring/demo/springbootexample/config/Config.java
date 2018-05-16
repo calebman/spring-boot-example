@@ -11,6 +11,20 @@ public class Config {
     @Value("${resources.midpHost}")
     private String midpHost;
 
+    @Value("${jwt.SECRET}")
+    private String secret;
+
+    @Value("${jwt.EXPIRATIONTIME}")
+    private long expirationtime;
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public long getExpirationtime() {
+        return expirationtime;
+    }
+
     public String getMidpHost() {
         return midpHost;
     }

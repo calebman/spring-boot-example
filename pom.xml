@@ -25,6 +25,17 @@
 	</properties>
 
 	<dependencies>
+		 <!--spring-security 和 jwt-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.7.0</version>
+		</dependency>
+
 		<!-- spring web mvc -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

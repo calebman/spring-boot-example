@@ -10,3 +10,8 @@ spring:
 #自定义配置
 resources:
     midpHost: 1.1.1.1
+
+#jwt配置
+jwt:
+    EXPIRATIONTIME: 1000
+    SECRET: OHAHAHAHA

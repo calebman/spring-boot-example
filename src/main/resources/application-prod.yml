@@ -11,3 +11,9 @@ spring:
 resources:
     logdir: logs/
     midpHost: 1.1.1.1
+
+#jwt配置
+jwt:
+    EXPIRATIONTIME: 1000*60*60*24*1
+    SECRET: OHAHAHAHA
+    HEADER_NAME: Authorization
