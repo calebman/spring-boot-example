@@ -512,7 +512,7 @@ resources:
         logger.error("日志输出 {}", "error");
         return "00";
     }
-```  
+```
 ### jwt配置  
 
 pom文件添加jwt与spring security依赖
@@ -527,45 +527,49 @@ pom文件添加jwt与spring security依赖
 			<artifactId>jjwt</artifactId>
 			<version>0.7.0</version>
 		</dependency>		 
-```  
+```
 
 自定义配置文件中添加jwt超时时间，token生成私钥
 
-在/jwt/JsonWebTokenUtility中定义生成token置于response头的方法以及解析token校验的方法  
+在/intercepter/JWTAuthInterceptor中定义生成token置于response头的方法以及解析token校验的方法  
 ```  
 
 
 #jwt配置
 jwt:
-    EXPIRATIONTIME: 1000
-    SECRET: OHAHAHAHA
+    expiredTime: 600000
+    key: jwtkey 
 
-```  
-自定义配置统一在config/Config中配置get方法  
-  
-  spring security配置某些url不被控制，例如 /testJwt  /testJwtdecrypt
+```
+
+
+  配置某些url不被控制，例如 /login方法，只需要将@ignoreJWT注解用于Controller类或者UrlMapping的方法上即可  
+  JWT校验不通过采取在拦截器中抛出JWTExpiredException、JWTIllegalException来返回响应信息，异常被抛出后的处理在全局异常处理器中，声明捕获以上两个jwt相关异常即可。
   ```
-      @Override
-      protected void configure(HttpSecurity http) throws Exception {
-          http
-                  .authorizeRequests()
-                  .antMatchers("/testJwt","/testJwtdecrypt").permitAll()
-                  .anyRequest().authenticated()
-                  .and()
-                  .formLogin()
-                  .loginPage("/login")
-                  .permitAll()
-                  .and()
-                  .logout()
-                  .permitAll();
-      }
-  
-      @Autowired
-      public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-          auth
-                  .inMemoryAuthentication()
-                  .withUser("user").password("password").roles("USER");
-      }
+      @RestController
+@Slf4j
+public class TestController {
+
+    @Value("${jwt.key}")
+    private String JWTKey;
+    @Value("${jwt.expiredTime}")
+    private long expiredTime;
+
+    @ignoreJWT
+    @PostMapping("/login")
+    public Response JWTLogin(String userName, String password){
+        log.info("用户登陆:{}",userName);
+        Response response = new Response();
+        if ("ohaha".equals(userName) && "123456".equals(password)){
+            JWTUser user = JWTUser.builder().userName(userName).password(password).build();
+            String JWTToken = JWTUtils.createJWT(user, UUID.randomUUID().toString(), user.getUserName(), JWTKey, expiredTime);
+            response.setData(JWTToken);
+        }else {
+            response.fail("登陆失败");
+        }
+        return response;
+    }
+    }
   ```
 
 ### 常用配置
@@ -586,7 +590,7 @@ public class Config {
 ##### 全局异常处理器
 ```
 @ControllerAdvice
-public class GlobalExceptionResolver {
+public class GlobalExceptionHandler {
 
     Logger logger = LoggerFactory.getLogger(GlobalExceptionResolver.class);
 
